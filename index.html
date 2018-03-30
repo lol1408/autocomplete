@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<link href="index.css" rel="stylesheet" type="text/css">
+	</head>
+	<body>
+		<div id="app">
+			<form @submit.prevent="onSubmit">
+				<div class="search-input">
+					<input type="search" v-model="searchString"
+						@keyup.down="focusDown"
+						@keyup.up="focusUp" class="input">
+					<input type="submit" value="Поиск">
+				</div>
+
+				<div class="search-results" v-if="searchString !=''">
+					<ul>
+						<item v-for="(item, index) in filteredList"
+							:id="item['id']"
+							:item-data="item"
+							:key="item['id']"
+							:index="index"
+							@setitem="setItem"
+							@setfocus="setFocus"
+						></item>
+					</ul>
+				</div>
+			</form>
+		</div>
+	</body>
+
+	<footer>
+		<script src="index.js"></script>
+	</footer>
+</html>
