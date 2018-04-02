@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 	<head>
+		<meta charset="utf-8">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 		<link href="index.css" rel="stylesheet" type="text/css">
 	</head>
@@ -8,10 +9,20 @@
 		<div id="app">
 			<form @submit.prevent="onSubmit">
 				<div class="search-input">
-					<input type="search" v-model="searchString"
+					<input type="checkbox" id="dumpster-rental" v-model="calculateIsDumster">
+					<label for="dumpster-rental">{{dumsterData.name}}</label>
+					<input type="checkbox" id="junk-removal" v-model="calculateIsJunk">
+					<label for="junk-removal">{{junkData.name}}</label>
+					<p v-if="isErrorCheckboxes">
+						<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Please select service(s)
+					</p>
+					<input type="search" v-model="calculateSearchString"
 						@keyup.down="focusDown"
 						@keyup.up="focusUp" class="input">
 					<input type="submit" value="Поиск">
+					<p v-if="isErrorNameCity">
+						<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Please enter your city, state abbreviation
+					</p>
 				</div>
 
 				<div class="search-results" v-if="searchString !=''">

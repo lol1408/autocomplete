@@ -47,20 +47,40 @@ var app = new Vue(
 			change: true,
 			resultData: [],
 			currentItem: -1,
+			isErrorCheckboxes: false,
+			isErrorNameCity: false,
+			dumsterData: {
+				id: 18,
+				name: 'Dumpster Rental',
+				isChecked: false
+			},
+			junkData: {
+				id: 19,
+				name: 'Junk Removal',
+				isChecked: false
+			},
 		},
 		//Методы компонента
 		methods: {
 			setItem: function (itemData) {
+				this.resultData[this.currentItem].isActive = false;
+				this.currentItem = -1;
 				title = this.resultData[itemData.index].title;
 				this.searchString = title[0] + title[1] + title[2];
 			},
+			// Клик по городу
 			setFocus: function (focusData) {
 				if (this.currentItem != -1){
 					this.resultData[this.currentItem].isActive = false;
 				}
-				this.currentItem = focusData.index;
+				if (!focusData.state){
+					this.currentItem = -1;
+				}else{
+					this.currentItem = focusData.index;
+				}
 				this.resultData[focusData.index].isActive = focusData.state;
 			},
+			// Переключить на город ниже
 			focusDown: function () {
 				if (this.currentItem != -1){
 					this.resultData[this.currentItem].isActive = false;
@@ -68,6 +88,7 @@ var app = new Vue(
 				this.currentItem = this.currentItem + 1 < this.resultData.length ? this.currentItem + 1 : this.resultData.length - 1;
 				this.resultData[this.currentItem].isActive = true;
 			},
+			// Переключить на город выше
 			focusUp: function () {
 				if (this.currentItem != -1){
 					this.resultData[this.currentItem].isActive = false;
@@ -77,18 +98,55 @@ var app = new Vue(
 					this.resultData[this.currentItem].isActive = true;
 				}
 			},
+			// Отправка формы
 			onSubmit: function () {
+				var ids_array = [];
+				var services = [];
+				var names_services = [];
+				var location = '';
+				var href = 'http://www.dumpsterco.com/?ignet_city=';
+
 				if (this.currentItem != -1){
 					title = this.resultData[this.currentItem].title;
 					this.searchString = title[0] + title[1] + title[2];
 					this.resultData[this.currentItem].isActive = false;
 					this.currentItem = -1;
+					return;
 				}
+				if (!this.dumsterData.isChecked && !this.junkData.isChecked){
+					this.isErrorCheckboxes = true;
+				}
+				if (this.searchString.length === 0){
+					this.isErrorNameCity = true;
+				}
+				if (this.isErrorCheckboxes || this.isErrorNameCity){
+					return;
+				}
+
+				this.resultData.forEach(function (value, index) {
+					ids_array[index] = value.id;
+				});
+				if (this.dumsterData.isChecked){
+					services.push(this.dumsterData.id);
+					names_services.push(this.dumsterData.name);
+				}
+				if (this.junkData.isChecked){
+					services.push(this.junkData.id);
+					names_services.push(this.junkData.name);
+				}
+				location = this.searchString;
+				href = href + JSON.stringify(ids_array) +
+					'&ignet_service=' + JSON.stringify(services) +
+					'&names_serv=' + JSON.stringify(names_services) +
+					'&location=' + location +
+					'&s=';
+				window.location.href = href;
+
 			}
 		},
-		//Вычисляемые состояния
+		// Вычисляемые состояния
 		computed: {
-			//Отрисовка списка найденых городов
+			// Отрисовка списка найденых городов
 			filteredList: function () {
 				if (!this.change) {
 					return this.resultData;
@@ -116,6 +174,40 @@ var app = new Vue(
 
 				this.resultData = result;
 				return this.resultData;
+			},
+			// Вычисляемое поле для чекбокса dumpster-rental
+			calculateIsDumster: {
+				get: function () {
+					return this.dumsterData.isChecked;
+				},
+				set: function () {
+					this.isErrorCheckboxes = false;
+					return this.dumsterData.isChecked = !this.dumsterData.isChecked;
+				}
+			},
+			// Вычисляемое поле для чекбокса junk-removal
+			calculateIsJunk: {
+				get: function () {
+					return this.junkData.isChecked;
+				},
+				set: function () {
+					this.isErrorCheckboxes = false;
+					return this.junkData.isChecked = !this.junkData.isChecked;
+				}
+			},
+			// Вычисляемое поле для инпута с названием города
+			calculateSearchString: {
+				get: function () {
+					return this.searchString;
+				},
+				set:function (newValue) {
+					this.isErrorNameCity = false;
+					if (this.currentItem !== -1) {
+						this.resultData[this.currentItem].isActive = false;
+					}
+					this.currentItem = -1;
+					return this.searchString = newValue;
+				},
 			}
 		},
 	}
